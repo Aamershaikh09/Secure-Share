@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String      @id @default(uuid())
+  email             String      @unique
+  name              String
+  passwordHash      String
+  salt              String
+  emailVerified     Boolean     @default(false)
+  storageLimitBytes BigInt      @default(10737418240) // 10 GB
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  files             File[]
+  folders           Folder[]
+  shares            ShareLink[]
+  sessions          Session[]
+  verificationTokens VerificationToken[]
+}
+
+model VerificationToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Folder {
+  id        String   @id @default(uuid())
+  name      String
+  color     String   @default("#3b82f6")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  files     File[]
+}
+
+model File {
+  id           String      @id @default(uuid())
+  originalName String
+  storedName   String      @unique
+  storagePath  String
+  mimeType     String
+  extension    String
+  size         Int
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId     String?
+  folder       Folder?     @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  shares       ShareLink[]
+}
+
+model ShareLink {
+  id             String    @id @default(uuid())
+  token          String    @unique
+  fileId         String
+  file           File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hasPassword    Boolean   @default(false)
+  passwordHash   String?
+  salt           String?
+  expiresAt      DateTime?
+  isRevoked      Boolean   @default(false)
+  viewsCount     Int       @default(0)
+  downloadsCount Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}

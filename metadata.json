@@ -1,0 +1,8 @@
+{
+  "name": "SecureShare",
+  "description": "Secure file storage, folder organization, and password-protected sharing with link expiry and revocation controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
