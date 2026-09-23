@@ -35,6 +35,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+app.set("trust proxy", 1);
 
 const SHARE_ACCESS_TTL_SECONDS = 15 * 60;
 const SHARE_ACCESS_SECRET = process.env.SHARE_ACCESS_SECRET || crypto.randomBytes(32).toString('hex');
